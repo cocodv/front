@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import StatementDownloader from "./StatementDownloader";
+
 
 export default function Dashboard({ api, token, user }) {
   const [balance, setBalance] = useState(null);
@@ -151,6 +153,8 @@ export default function Dashboard({ api, token, user }) {
         </form>
         {msg && <p className="text-green-600 font-medium mt-4 text-center">{msg}</p>}
       </div>
+      <StatementDownloader txs={txs} user={user} />
+
 
       {/* TRANSACTIONS TABLE */}
       <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200 max-w-5xl mx-auto">
