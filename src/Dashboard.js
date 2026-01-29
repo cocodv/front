@@ -153,7 +153,12 @@ export default function Dashboard({ api, token, user }) {
         </form>
         {msg && <p className="text-green-600 font-medium mt-4 text-center">{msg}</p>}
       </div>
-      <StatementDownloader txs={txs} user={user} />
+    
+{user && <StatementDownloader user={user} api="http://localhost:5000" />}
+
+
+{/* {user && <StatementDownloader user={user} api="https://back-b38k.onrender.com" />} */}
+
 
 
       {/* TRANSACTIONS TABLE */}

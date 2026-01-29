@@ -4,6 +4,7 @@ import Dashboard from "./Dashboard";
 import AdminPage from "./AdminPage";
 
 const API = "https://back-b38k.onrender.com"; // <-- keep consistent
+// const API = "http://localhost:5000";
 
 function App() {
   const [token, setToken] = useState(localStorage.getItem("token"));

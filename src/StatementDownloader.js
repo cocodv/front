@@ -1,94 +1,79 @@
 import React, { useState } from "react";
 
-export default function StatementDownloader({ txs, user }) {
-  const [from, setFrom] = useState("");
-  const [to, setTo] = useState("");
-  const [filtered, setFiltered] = useState([]);
+export default function StatementDownloader({ user, api }) {
+  const [start, setStart] = useState("");
+  const [end, setEnd] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const filterTxs = () => {
-    if (!from || !to) return;
+  const handleDownload = async () => {
+    setError("");
 
-    const fromDate = new Date(from);
-    const toDate = new Date(to);
+    // Ensure user is loaded
+    const userId = user?._id || user?.id;
+    if (!userId) {
+      setError("User not loaded");
+      return;
+    }
 
-    const result = txs.filter(t => {
-      const d = new Date(t.created_at);
-      return d >= fromDate && d <= toDate;
-    });
+    if (!start || !end) {
+      setError("Please select a start and end date");
+      return;
+    }
 
-    setFiltered(result);
-  };
+    setLoading(true);
+    try {
+      const url = `${api}/statement?user_id=${userId}&start=${start}&end=${end}`;
+      const res = await fetch(url, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
 
-  const downloadStatement = () => {
-    let csv = "";
-    csv += `Manchester Credit Union\n`;
-    csv += `Name: ${user.username}\n`;
-    csv += `Address: 2 Maybury Street, Gorton M18 8GP, United Kingdom\n`;
-    csv += `Statement Period: ${from} to ${to}\n\n`;
-    csv += `Date,Status,Type,Amount,Description\n`;
+      if (!res.ok) throw new Error("Failed to fetch statement");
 
-    filtered.forEach(t => {
-      csv += `${new Date(t.created_at).toLocaleString()},${t.status},${t.type},${t.amount},${t.description}\n`;
-    });
-
-    const blob = new Blob([csv], { type: "text/csv" });
-    const url = window.URL.createObjectURL(blob);
-
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `statement_${from}_to_${to}.csv`;
-    a.click();
-
-    window.URL.revokeObjectURL(url);
+      const blob = await res.blob();
+      const link = document.createElement("a");
+      link.href = window.URL.createObjectURL(blob);
+      link.download = `statement_${start}_to_${end}.pdf`;
+      link.click();
+      window.URL.revokeObjectURL(link.href);
+    } catch (err) {
+      console.error(err);
+      setError("Error downloading statement");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200 max-w-5xl mx-auto mb-10">
-      <h3 className="text-xl font-semibold text-center mb-4">
-        Download Bank Statement
-      </h3>
+    <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200 mb-8 max-w-xl mx-auto">
+      <h3 className="text-xl font-semibold text-gray-800 mb-4 text-center">Download Statement</h3>
 
       <div className="flex flex-col sm:flex-row gap-4 mb-4">
         <input
           type="date"
-          value={from}
-          onChange={e => setFrom(e.target.value)}
-          className="px-4 py-2 border rounded-lg"
+          className="flex-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+          value={start}
+          onChange={(e) => setStart(e.target.value)}
         />
         <input
           type="date"
-          value={to}
-          onChange={e => setTo(e.target.value)}
-          className="px-4 py-2 border rounded-lg"
+          className="flex-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+          value={end}
+          onChange={(e) => setEnd(e.target.value)}
         />
         <button
-          onClick={filterTxs}
-          className="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700"
+          onClick={handleDownload}
+          className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition font-semibold"
+          disabled={loading}
         >
-          Search
+          {loading ? "Downloading..." : "Download PDF"}
         </button>
       </div>
 
-      {filtered.length > 0 && (
-        <>
-          <p className="text-sm text-gray-600 mb-2">
-            Found {filtered.length} transactions
-          </p>
-
-          <button
-            onClick={downloadStatement}
-            className="bg-green-600 text-white px-5 py-2 rounded-lg hover:bg-green-700"
-          >
-            Download Statement
-          </button>
-        </>
-      )}
-
-      {filtered.length === 0 && from && to && (
-        <p className="text-gray-500 mt-2">
-          No transactions in selected range.
-        </p>
-      )}
+      {error && <p className="text-red-600 text-center mt-2">{error}</p>}
     </div>
   );
 }
