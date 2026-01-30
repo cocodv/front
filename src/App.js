@@ -55,13 +55,20 @@ function App() {
     <div style={{ padding: 20, fontFamily: "Arial" }}>
       {me && (
         <>
-          <header className="text-center mt-12 text-sm text-gray-500 mb-8">
-            &copy; Credit Union Member Online Account
-            <p>
-              Logged in as <b>{me.username}</b> ({me.is_admin ? "Admin" : "User"})
-              <button onClick={logout} style={{ marginLeft: 10 }}>Logout</button>
-            </p>
-          </header>
+         <header className="text-center mt-12 text-sm text-gray-500 mb-8">
+  &copy; Credit Union Member Online Account
+  <p>
+    Logged in as <b>{me.username}</b> ({me.is_admin ? "Admin" : "User"})
+    <button onClick={logout} style={{ marginLeft: 10 }}>Logout</button>
+  </p>
+  <p className="mt-2 text-xs text-gray-400 max-w-xl mx-auto">
+    This bank is authorised by the Prudential Regulation Authority and regulated by the Financial Conduct Authority and the Prudential Regulation Authority. 
+    Your eligible deposits are protected by the Financial Services Compensation Scheme (FSCS) up to a total of £85,000 per person. 
+    This means that if the bank were to fail, the FSCS would compensate you for your eligible deposits up to that limit. 
+    Any deposits above £85,000 are unlikely to be covered.
+  </p>
+</header>
+
 
           <Dashboard api={API} token={token} user={me} />
 
